@@ -1,40 +1,23 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
-import os
-import json
-import asyncio
 
-# 1. Setup minimal intents
-intents = discord.Intents.default()
+class Sync(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        # Your User ID is now set
+        self.owner_id = 1424069313341554879 
 
-# 2. Setup the bot
-bot = commands.Bot(command_prefix="!", intents=intents)
+    @app_commands.command(name="sync", description="Force sync slash commands")
+    async def sync(self, interaction: discord.Interaction):
+        # Check if the person running the command is you
+        if interaction.user.id != self.owner_id:
+            await interaction.response.send_message("You are not the owner!", ephemeral=True)
+            return
 
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user}')
-    
-    # 3. Load the server ID from your config
-    with open('private_config.json', 'r') as f:
-        config = json.load(f)
-        guild_id = config['ALLOWED_GUILD_IDS'][0]
-    
-    # 4. Sync the commands to the specific server
-    target_guild = discord.Object(id=guild_id)
-    bot.tree.copy_global_to(guild=target_guild)
-    await bot.tree.sync(guild=target_guild)
-    print(f"Synced commands to {guild_id}")
+        # Perform the sync
+        synced = await self.bot.tree.sync(guild=interaction.guild)
+        await interaction.response.send_message(f"Successfully synced {len(synced)} commands.", ephemeral=True)
 
-async def load_extensions():
-    # Looks for .py files in a 'cogs' folder
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
-            await bot.load_extension(f'cogs.{filename[:-3]}')
-
-async def main():
-    async with bot:
-        await load_extensions()
-        await bot.start(os.getenv("DISCORD_TOKEN"))
-
-if __name__ == "__main__":
-    asyncio.run(main())
+async def setup(bot):
+    await bot.add_cog(Sync(bot))
