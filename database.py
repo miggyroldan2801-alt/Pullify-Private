@@ -1,6 +1,6 @@
-import sqlite3
 import asyncio
 import logging
+import aiosqlite  # type: ignore
 
 class DBManager:
     DB_PATH = "pullify_utils.db"
