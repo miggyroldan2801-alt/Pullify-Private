@@ -1,36 +1,26 @@
 import os
-import sys
 import discord
+import json
 from discord.ext import commands
 
-# 1. Debugging: This prints to the Runtime logs so you know if it even starts
-print("DEBUG: Application starting...")
+# Load configuration
+with open('private_config.json', 'r') as f:
+    config = json.load(f)
 
-# 2. Token Handling
-# Ensure your environment variable matches the one set in your dashboard
-TOKEN = os.getenv("DISCORD_TOKEN") 
-
-if not TOKEN:
-    print("CRITICAL: DISCORD_TOKEN is not set in the environment variables.")
-    sys.exit(1) # Exit with error code to prevent 'Completed' status on success
-
-# 3. Bot Setup
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-@bot.event
-async def on_ready():
-    print(f"Bot successfully logged in as {bot.user}")
+async def load_extensions():
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            await bot.load_extension(f'cogs.{filename[:-3]}')
 
-# 4. Blocking Execution
+async def main():
+    async with bot:
+        await load_extensions()
+        await bot.start(config['token'])
+
 if __name__ == "__main__":
-    try:
-        # bot.run() is the correct, blocking way to start a discord.py bot
-        bot.run(TOKEN)
-    except discord.errors.LoginFailure:
-        print("CRITICAL: Invalid token. Please check your Discord Developer Portal.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"CRITICAL: Bot crashed: {e}")
-        sys.exit(1)
+    import asyncio
+    asyncio.run(main())
