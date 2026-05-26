@@ -1,35 +1,25 @@
-import os
 import discord
-import json
+import os
+import asyncio
 from discord.ext import commands
 
-# 1. Try to get token from Environment Variable, otherwise load from file
-token = os.getenv('DISCORD_TOKEN')
-
-if not token:
-    try:
-        with open('private_config.json', 'r') as f:
-            config = json.load(f)
-            token = config.get('token')
-    except FileNotFoundError:
-        print("Error: No token found in environment or config file.")
-        exit(1)
-
+# Basic configuration
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+intents.members = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 async def load_extensions():
-    # Only load files from cogs folder
+    # Only loads valid Cog files
     for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
+        if filename.endswith('.py') and filename != 'errors.py':
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
 async def main():
     async with bot:
         await load_extensions()
-        await bot.start(token)
+        await bot.start('YOUR_BOT_TOKEN_HERE')
 
-if __name__ == "__main__":
-    import asyncio
+if __name__ == '__main__':
     asyncio.run(main())

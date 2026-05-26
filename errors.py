@@ -1,9 +1,9 @@
 ﻿import discord
 
 async def handle_api_error(interaction: discord.Interaction, error: Exception):
-    print(f"API Error: {error}")
+    print(f"API Error detected: {error}")
     embed = discord.Embed(
-        title="Error",
+        title="⚠️ System Error",
         description="A service error occurred. Please try again later.",
         color=discord.Color.red()
     )
