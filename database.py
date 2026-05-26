@@ -8,12 +8,5 @@ def init_db():
     conn.commit()
     conn.close()
 
-def log_verification(ip_hash, user_id, status):
-    # Logic to insert into DB
-    pass
-
-def is_banned(user_id, ip_hash):
-    # Logic to check if user or IP is banned
-    return False
-
+# Call this once at startup if needed
 init_db()
